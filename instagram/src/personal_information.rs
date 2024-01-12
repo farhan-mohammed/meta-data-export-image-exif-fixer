@@ -1,8 +1,5 @@
-use crate::helpers::{get_file, get_seconds_timestamp, set_photo_taken_time};
-
+use crate::helpers::*;
 use serde::Deserialize;
-use serde_json::Error as SerdeJsonError;
-use std::fs::metadata;
 
 #[derive(Debug, Deserialize)] // Derive Deserialize trait for your struct
 struct MyConfig {
@@ -41,45 +38,43 @@ struct ProfilePhoto {
     creation_timestamp: i64,
 }
 
-pub fn read_json_and_get_profile_user(src_path: &str) -> Result<Option<String>, SerdeJsonError> {
+pub fn execute(src_path: &str) {
+    println!("Started processing personal information");
     let json_name = "personal_information.json";
     let file_path = "personal_information/personal_information";
+    match get_file(src_path, file_path, json_name) {
+        Ok(file) => {
+            let json: MyConfig = serde_json::from_reader(file)
+                .unwrap_or_else(|_| panic!("Unable to find/read {}", json_name));
 
-    let file = get_file(src_path, file_path, json_name).expect("file should open read only");
-    let json: MyConfig = serde_json::from_reader(file)
-        .unwrap_or_else(|_| panic!("Unable to find/read {}", json_name));
+            if !json.has_profile_user() {
+                println!("Error Missing Json: {json_name}");
+                return;
+            }
+            if let Some(profile_user) = json.profile_user {
+                for element in profile_user.iter() {
+                    if !element.has_media_data() {
+                        continue;
+                    }
 
-    if !json.has_profile_user() {
-        println!("Error Missing Json: {json_name}");
-        return Ok(None);
-    }
+                    let media_map_data = element.media_map_data.as_ref().unwrap();
+                    if !media_map_data.has_profile_photo() {
+                        continue;
+                    }
 
-    let profile_user = &json.profile_user.unwrap();
-    for element in profile_user.iter() {
-        if !element.has_media_data() {
-            continue;
+                    let profile_photo = media_map_data.profile_photo.as_ref().unwrap();
+                    let photo_file_path = &format!("{}/{}", src_path, profile_photo.uri);
+
+                    let timestamp = get_seconds_timestamp(profile_photo.creation_timestamp);
+
+                    let _ = set_photo_taken_time(photo_file_path, timestamp);
+                }
+            }
         }
-
-        let media_map_data = element.media_map_data.as_ref().unwrap();
-        if !media_map_data.has_profile_photo() {
-            continue;
-        }
-
-        let profile_photo = media_map_data.profile_photo.as_ref().unwrap();
-        let photo_file_path = &format!("{}/{}", src_path, profile_photo.uri);
-
-        let timestamp = get_seconds_timestamp(profile_photo.creation_timestamp);
-
-        if metadata(photo_file_path).is_ok() {
-            let _ = set_photo_taken_time(photo_file_path, timestamp);
-            // if res.is_ok() {
-            //     println!("✅ Saved Successfully {photo_file_path} {timestamp}")
-            // } else {
-            //     println!("❌ Error Saving file {photo_file_path} {timestamp}");
-            // }
+        Err(err) => {
+            println!("[Error reading {}/{} {err}]", file_path, json_name);
         }
     }
 
     println!("Completed Personal Infomration");
-    Ok(None)
 }

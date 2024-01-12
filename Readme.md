@@ -5,7 +5,6 @@
 
 - These scripts add the field "Created Date" back to the images on data exported from meta. 
 - There was some EXIF data also available, but it wasn't common or detailed enough. I only needed the created date to sort photos and files. 
-- I use the command `touch -t <date_time> <photo_file_path>` to update the Created Date. 
 - If the created time on the image was not available, I used the upload timestamp.
 - I make a huge assumption that all directories given do not start or end with `/`
 
@@ -16,6 +15,7 @@ Prereq: [Install Rust](https://www.rust-lang.org/learn/get-started)
 
 - I had multiple exports so I merged them and ran this to one folder. 
 - In one of my exports the `your_activity_across_facebook` was inside another folder. I merged that with the root directory as well. 
+- I use the command `touch -t <date_time> <photo_file_path>` to update the Created Date. 
 
 ```sh
 cd facebook
@@ -345,8 +345,222 @@ cargo run -- <export_directory>
 
 ## Instagram
 
+- I had 2 export files and I merged them at root.
+- I use the cargo package `filetime_creation` to update the created date
+
 ```sh
 cd instagram
 cargo build
 cargo run -- <export_directory>  # If you have multiple exports, run on each dir
 ```
+
+<details>
+  <summary>Directory Tree</summary>
+
+- I provided the directory as a reference point for how this code was written. In a few years or months this structure might change and the code might not work anymore. 
+
+```
+├── ads_information
+│   ├── ads_and_topics
+│   │   ├── accounts_you're_not_interested_in.json
+│   │   ├── ads_viewed.json
+│   │   ├── posts_viewed.json
+│   │   ├── posts_you're_not_interested_in.json
+│   │   ├── suggested_accounts_viewed.json
+│   │   └── videos_watched.json
+│   ├── advertising
+│   │   └── no-data.txt
+│   └── instagram_ads_and_businesses
+│       └── advertisers_using_your_activity_or_information.json
+├── apps_and_websites_off_of_instagram
+│   └── apps_and_websites
+│       ├── no-data.txt
+│       └── your_activity_off_meta_technologies.json
+├── connections
+│   ├── contacts
+│   │   ├── no-data.txt
+│   │   └── synced_contacts.json
+│   └── followers_and_following
+│       ├── blocked_accounts.json
+│       ├── close_friends.json
+│       ├── follow_requests_you've_received.json
+│       ├── followers_1.json
+│       ├── following.json
+│       ├── pending_follow_requests.json
+│       ├── recent_follow_requests.json
+│       ├── recently_unfollowed_accounts.json
+│       └── removed_suggestions.json
+├── logged_information
+│   ├── link_history
+│   │   ├── link_history.json
+│   │   ├── no-data.txt
+│   │   └── your_link_history_settings.json
+│   ├── past_instagram_insights
+│   │   └── no-data.txt
+│   ├── policy_updates_and_permissions
+│   │   ├── no-data.txt
+│   │   └── notification_of_privacy_policy_updates.json
+│   └── recent_searches
+│       ├── account_searches.json
+│       └── no-data.txt
+├── media
+│   ├── archived_posts
+│   │   ├── 201712
+│   │   ├── 201805
+│   │   ├── 201806
+│   │   ├── 201807
+│   ├── other
+│   ├── posts
+│   │   ├── 201805
+│   │   └── 202211
+│   └── stories
+│       ├── 202009
+│       ├── 202104
+│       ├── 202108
+│       ├── 202308
+├── personal_information
+│   ├── autofill_information
+│   │   └── no-data.txt
+│   ├── device_information
+│   │   ├── camera_information.json
+│   │   └── devices.json
+│   ├── digital_wallets
+│   │   └── no-data.txt
+│   ├── information_about_you
+│   │   ├── account_based_in.json
+│   │   └── possible_phone_numbers.json
+│   ├── loyalty_accounts
+│   │   └── no-data.txt
+│   └── personal_information
+│       ├── account_information.json
+│       ├── linked_meta_accounts.json
+│       ├── note_interactions.json
+│       ├── personal_information.json
+│       ├── professional_information.json
+│       └── profile_changes.json
+├── preferences
+│   ├── media_settings
+│   │   ├── comments_allowed_from.json
+│   │   ├── consents.json
+│   │   ├── notification_preferences.json
+│   │   └── use_cross-app_messaging.json
+│   └── your_topics
+│       ├── no-data.txt
+│       └── your_topics.json
+├── security_and_login_information
+│   └── login_and_account_creation
+│       ├── account_privacy_changes.json
+│       ├── account_status_changes.json
+│       ├── last_known_location.json
+│       ├── login_activity.json
+│       ├── logout_activity.json
+│       ├── password_change_activity.json
+│       └── signup_information.json
+├── your_activity_across_facebook
+│   └── messages
+│       └── inbox
+│           ├── [id_1]
+│           │   └── photos
+│           ├── [id_2]
+│           │   ├── photos
+│           │   └── videos
+│           ├── [id_3]
+│           │   ├── photos
+│           │   └── videos
+│           ├── [id_4]
+│           │   ├── audio
+│           │   ├── photos
+│           │   └── videos
+│           ├── [id_5]
+│           │   ├── audio
+│           │   ├── photos
+│           │   └── videos
+│           └── [id_6]
+│               ├── photos
+│               └── videos
+└── your_instagram_activity
+    ├── comments
+    │   ├── comments_reported.json
+    │   ├── post_comments_1.json
+    │   └── reels_comments.json
+    ├── content
+    │   ├── archived_posts.json
+    │   ├── posts_1.json
+    │   ├── profile_photos.json
+    │   └── stories.json
+    ├── events
+    │   └── no-data.txt
+    ├── fundraisers
+    │   └── no-data.txt
+    ├── gifts
+    │   └── no-data.txt
+    ├── guides
+    │   └── no-data.txt
+    ├── instagram_live
+    │   └── no-data.txt
+    ├── likes
+    │   ├── liked_comments.json
+    │   └── liked_posts.json
+    ├── messages
+    │   ├── inbox
+    │   │   ├── [id_1]
+    │   │   │   └── message_1.json
+    │   │   ├── [id_2]
+    │   │   │   └── message_1.json
+    │   │   ├── [id_3]
+    │   │   │   └── message_1.json
+    │   │   ├── [id_4]
+    │   │   │   ├── message_1.json
+    │   │   │   └── message_2.json
+    │   │   ├── [id_5]
+    │   │   │   ├── message_1.json
+    │   │   │   ├── message_2.json
+    │   │   │   └── message_3.json
+    │   │   ├── [id_6]
+    │   │   │   └── message_1.json
+    │   │   ├── [id_7]
+    │   │   │   └── message_1.json
+    │   │   ├── [id_8]
+    │   │   │   └── message_1.json
+    │   ├── message_requests
+    │   │   ├── [id_1]
+    │   │   │   └── message_1.json
+    │   │   ├── [id_2]
+    │   │   │   └── message_1.json
+    │   │   ├── [id_3]
+    │   │   │   └── message_1.json
+    │   └── secret_conversations.json
+    ├── meta_spark
+    │   └── no-data.txt
+    ├── monetization
+    │   └── eligibility.json
+    ├── other_activity
+    │   └── no-data.txt
+    ├── reports
+    │   └── no-data.txt
+    ├── saved
+    │   ├── saved_collections.json
+    │   └── saved_posts.json
+    ├── shopping
+    │   ├── no-data.txt
+    │   ├── recently_viewed_items.json
+    │   └── wishlist_items.json
+    ├── story_sticker_interactions
+    │   ├── countdowns.json
+    │   ├── emoji_sliders.json
+    │   ├── polls.json
+    │   ├── questions.json
+    │   ├── quizzes.json
+    │   └── story_likes.json
+    ├── subscriptions
+    │   └── no-data.txt
+    └── threads
+        ├── follow_requests_you've_received.json
+        ├── followers.json
+        ├── following.json
+        ├── no-data.txt
+        ├── pending_follow_requests.json
+        ├── personal_information.json
+        └── recent_follow_requests.json
+```
+</details>

@@ -1,8 +1,6 @@
-use std::path::Path;
-// helpers.rs
-use chrono::*;
 use filetime_creation::{set_file_times, FileTime};
 use std::io::Error;
+use std::path::Path;
 use std::{fs::File, io::ErrorKind};
 
 pub fn get_file(src_path: &str, file_path: &str, file: &str) -> Result<File, Error> {
@@ -31,15 +29,18 @@ pub fn get_seconds_timestamp(time: i64) -> i64 {
     }
 }
 
-pub fn set_photo_taken_time(photo_file_path: &String, timestamp: i64) -> Result<(), Error> {
+pub fn set_photo_taken_time(photo_file_path: &String, timestamp: i64) {
     let photo_path = std::path::Path::new(&photo_file_path);
     let time = FileTime::from_unix_time(timestamp, 0);
-
-    let dt: DateTime<Utc> = Utc.timestamp_opt(timestamp, 0).unwrap();
-    let exif_date_time = dt.format("%Y").to_string();
-    println!("{exif_date_time}");
-
-    set_file_times(photo_path, time, time, time)
+    // let dt: DateTime<Utc> = Utc.timestamp_opt(timestamp, 0).unwrap();
+    // let exif_date_time = dt.format("%Y").to_string();
+    match set_file_times(photo_path, time, time, time) {
+        Ok(_) => 1,
+        Err(err) => {
+            println!("❌ Error setting file time {photo_file_path} {timestamp}: {err}");
+            0
+        }
+    };
 }
 
 pub fn get_directories(
