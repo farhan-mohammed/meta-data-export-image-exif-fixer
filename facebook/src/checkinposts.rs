@@ -1,6 +1,5 @@
 // src/my_module.rs
 use crate::helpers::*;
-use core::time;
 use serde::Deserialize;
 use serde_json::Error as SerdeJsonError;
 use std::fs::metadata;
@@ -32,10 +31,10 @@ struct Media {
 }
 impl Media {
     fn has_media(&self) -> bool {
-        return self.media.is_some();
+        self.media.is_some()
     }
     fn get_media(&self) -> &MediaItem {
-        return &self.media.as_ref().unwrap();
+        self.media.as_ref().unwrap()
     }
 }
 
@@ -78,7 +77,6 @@ impl PhotoMetadata {
 
 #[derive(Debug, Deserialize)]
 struct ExifData {
-    upload_ip: String,
     taken_timestamp: Option<i64>,
 }
 impl ExifData {
@@ -91,36 +89,32 @@ fn process_media_tem(photo_uri: &str, src_path: &str, last_modified_timestamp: i
     let uri = remove_prefix(photo_uri, "your_activity_across_facebook/");
     let photo_file_path = &format!("{src_path}/{uri}");
     println!("{}", photo_file_path);
-    let mut timestamp = get_seconds_timestamp(last_modified_timestamp);
+    let timestamp = get_seconds_timestamp(last_modified_timestamp);
     if metadata(photo_file_path).is_ok() {
-        let res = set_photo_taken_time(photo_file_path, timestamp);
-        if res.is_ok() {
-            // println!("✅ Saved Successfully {photo_file_path} {timestamp}")
-        } else {
-            // println!("❌ Error Saving file {photo_file_path} {timestamp}");
-        }
+        let _ = set_photo_taken_time(photo_file_path, timestamp);
+        // if res.is_ok() {
+        //     // println!("✅ Saved Successfully {photo_file_path} {timestamp}")
+        // } else {
+        //     // println!("❌ Error Saving file {photo_file_path} {timestamp}");
+        // }
     }
 }
 
 pub fn read_json_and_get_profile_user(src_path: &str) -> Result<Option<String>, SerdeJsonError> {
-    let directory_path = format!("posts");
-    let jsons = match get_json_file_names(src_path, &directory_path, "your_posts__check_ins") {
+    let directory_path = "posts";
+    let jsons = match get_json_file_names(src_path, directory_path, "your_posts__check_ins") {
         Ok(messages_json) => messages_json,
         Err(_err) => return Ok(None),
     };
     for json in jsons.iter() {
         println!("{}", json);
-        let file = get_file(src_path, &directory_path, &json).expect("file should open read only");
+        let file = get_file(src_path, directory_path, json).expect("file should open read only");
         let json: Vec<CheckInPosts> = serde_json::from_reader(file).expect("Unable to read file");
-        println!("p1");
         for media in json {
             if media.has_attachments() {
-                println!("p2");
-
                 let attachments = media.attachments.as_ref().unwrap();
                 for checkin_media in attachments.iter() {
                     if checkin_media.has_data() {
-                        println!("p3");
                         let data = checkin_media.data.as_ref().unwrap();
                         for d in data.iter() {
                             if d.has_media() {
@@ -145,11 +139,11 @@ pub fn read_json_and_get_profile_user(src_path: &str) -> Result<Option<String>, 
                                                         break;
                                                     }
                                                 }
-                                                if timestamp.is_some() {
+                                                if let Some(timestamp_value) = timestamp {
                                                     process_media_tem(
                                                         photo_uri,
                                                         src_path,
-                                                        *timestamp.as_ref().unwrap(),
+                                                        timestamp_value,
                                                     );
                                                     continue;
                                                 }

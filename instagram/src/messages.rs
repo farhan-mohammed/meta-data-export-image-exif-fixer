@@ -17,10 +17,10 @@ struct MessageItem {
 }
 impl MessageItem {
     fn has_photos(&self) -> bool {
-        return self.photos.is_some() && self.photos.as_ref().unwrap().len() != 0;
+        self.photos.is_some() && !self.photos.as_ref().unwrap().is_empty()
     }
     fn has_videos(&self) -> bool {
-        return self.videos.is_some() && self.videos.as_ref().unwrap().len() != 0;
+        self.videos.is_some() && !self.videos.as_ref().unwrap().is_empty()
     }
 }
 
@@ -31,10 +31,10 @@ struct PhotoItem {
 }
 impl PhotoItem {
     fn has_uri(&self) -> bool {
-        return self.uri.is_some();
+        self.uri.is_some()
     }
     fn has_timestamp_ms(&self) -> bool {
-        return self.timestamp_ms.is_some();
+        self.timestamp_ms.is_some()
     }
 }
 
@@ -74,17 +74,17 @@ pub fn read_json_and_get_profile_user(src_path: &str) -> Result<Option<String>, 
                         }
 
                         if metadata(photo_file_path).is_ok() {
-                            let res = set_photo_taken_time(photo_file_path, timestamp);
-                            if res.is_ok() {
-                                // println!("✅ Saved Successfully {photo_file_path} {timestamp}")
-                            } else {
-                                // println!("❌ Error Saving file {photo_file_path} {timestamp}");
-                            }
+                            let _ = set_photo_taken_time(photo_file_path, timestamp);
+                            // if res.is_ok() {
+                            //     // println!("✅ Saved Successfully {photo_file_path} {timestamp}")
+                            // } else {
+                            //     // println!("❌ Error Saving file {photo_file_path} {timestamp}");
+                            // }
                         }
                     }
                 }
 
-                if message.has_videos(){
+                if message.has_videos() {
                     let videos: &Vec<PhotoItem> = message.videos.as_ref().unwrap();
                     for video in videos.iter() {
                         if !video.has_uri() {

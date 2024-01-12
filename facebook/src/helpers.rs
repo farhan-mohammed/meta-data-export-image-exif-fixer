@@ -1,7 +1,6 @@
 use std::path::Path;
 // helpers.rs
 use chrono::*;
-use filetime_creation::{set_file_times, FileTime};
 use std::io::Error;
 use std::process::{Command, Output};
 use std::{fs::File, io::ErrorKind};
@@ -15,9 +14,9 @@ pub fn get_file(src_path: &str, file_path: &str, file: &str) -> Result<File, Err
 
     // println!("{json_path}")
     if Path::new(&json_path).exists() {
-        return File::open(json_path);
+        File::open(json_path)
     } else {
-        return Err(Error::new(ErrorKind::NotFound, "File not found"));
+        Err(Error::new(ErrorKind::NotFound, "File not found"))
     }
 }
 
@@ -26,11 +25,11 @@ pub fn get_seconds_timestamp(time: i64) -> i64 {
     // if its ms add EPOCH and return as s
     if time < 1_000_000_000_000 {
         // Assume time is in seconds, convert to milliseconds
-        return time;
+        time
     } else {
         // Assume time is in milliseconds, convert to seconds
         // let epoch = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
-        return (time) / 1000;
+        (time) / 1000
     }
 }
 pub fn remove_prefix(input: &str, prefix: &str) -> String {
@@ -41,8 +40,8 @@ pub fn remove_prefix(input: &str, prefix: &str) -> String {
     }
 }
 pub fn set_photo_taken_time(photo_file_path: &String, timestamp: i64) -> Result<Output, Error> {
-    let photo_path = std::path::Path::new(&photo_file_path);
-    let time = FileTime::from_unix_time(timestamp, 0);
+    // let photo_path = std::path::Path::new(&photo_file_path);
+    // let time = FileTime::from_unix_time(timestamp, 0);
 
     let dt: DateTime<Utc> = Utc.timestamp_opt(timestamp, 0).unwrap();
     let exif_date_time = dt.format("%Y%m%d%H%M.%S").to_string();
@@ -55,11 +54,11 @@ pub fn set_photo_taken_time(photo_file_path: &String, timestamp: i64) -> Result<
     // }
     // let command = format!("touch -t {} {}",exif_date_time,photo_file_path);
     // println!("{command}");
-    return Command::new("touch")
+    Command::new("touch")
         .arg("-t")
         .arg(exif_date_time)
         .arg(photo_file_path)
-        .output();
+        .output()
 }
 
 pub fn get_directories(
@@ -67,7 +66,7 @@ pub fn get_directories(
     directory_path: &str,
 ) -> Result<Vec<String>, std::io::Error> {
     let full_path: String = format!("{}/{}", src_path, directory_path);
-    let entries = match std::fs::read_dir(&full_path) {
+    let entries = match std::fs::read_dir(full_path) {
         Ok(entries) => entries,
         Err(err) => return Err(err),
     };

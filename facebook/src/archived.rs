@@ -2,8 +2,7 @@
 use crate::helpers::*;
 use serde::Deserialize;
 use serde_json::Error as SerdeJsonError;
-use std::fs::{self, metadata};
-use std::path::Path;
+use std::fs::metadata;
 
 #[derive(Debug, Deserialize)]
 struct MyConfig {
@@ -38,14 +37,20 @@ impl PhotoItem {
 
 fn process_media_item(medias: &[PhotoItem], src_path: &str, message_timestamp: i64) {
     for media in medias.iter().filter(|media| media.has_uri()) {
-        let uri = remove_prefix(media.uri.as_ref().unwrap(), "your_activity_across_facebook/");
+        let uri = remove_prefix(
+            media.uri.as_ref().unwrap(),
+            "your_activity_across_facebook/",
+        );
         let photo_file_path = format!("{}/{}", src_path, uri);
 
-        let timestamp = media.timestamp_ms.map_or_else(|| get_seconds_timestamp(message_timestamp), |ts| get_seconds_timestamp(ts));
+        let timestamp = media.timestamp_ms.map_or_else(
+            || get_seconds_timestamp(message_timestamp),
+            get_seconds_timestamp,
+        );
 
         if let Ok(metadata) = metadata(&photo_file_path) {
             if metadata.is_file() {
-                if let Ok(_) = set_photo_taken_time(&photo_file_path, timestamp) {
+                if set_photo_taken_time(&photo_file_path, timestamp).is_ok() {
                     println!("✅ Saved Successfully {} {}", photo_file_path, timestamp);
                 } else {
                     println!("❌ Error Saving file {} {}", photo_file_path, timestamp);
@@ -62,9 +67,17 @@ pub fn read_json_and_get_profile_user(src_path: &str) -> Result<Option<String>, 
         if let Ok(directories) = get_directories(src_path, &directory_path) {
             let total_dir = directories.len();
             for (i, directory) in directories.iter().enumerate() {
-                println!("{}/{} out of {} {}", i + 1, total_dir, directory_path, directory);
+                println!(
+                    "{}/{} out of {} {}",
+                    i + 1,
+                    total_dir,
+                    directory_path,
+                    directory
+                );
                 let subdirectory_path = format!("{}/{}", directory_path, directory);
-                if let Ok(messages_json) = get_json_file_names(src_path, &subdirectory_path, "message") {
+                if let Ok(messages_json) =
+                    get_json_file_names(src_path, &subdirectory_path, "message")
+                {
                     for message_json in messages_json.iter() {
                         let file = get_file(src_path, &subdirectory_path, message_json)
                             .expect("file should open read only");
@@ -72,13 +85,25 @@ pub fn read_json_and_get_profile_user(src_path: &str) -> Result<Option<String>, 
                             let messages = &json.messages;
                             for message in messages.iter() {
                                 if message.has_media(&message.photos) {
-                                    process_media_item(&message.photos.as_ref().unwrap(), src_path, message.timestamp_ms);
+                                    process_media_item(
+                                        message.photos.as_ref().unwrap(),
+                                        src_path,
+                                        message.timestamp_ms,
+                                    );
                                 }
                                 if message.has_media(&message.videos) {
-                                    process_media_item(&message.videos.as_ref().unwrap(), src_path, message.timestamp_ms);
+                                    process_media_item(
+                                        message.videos.as_ref().unwrap(),
+                                        src_path,
+                                        message.timestamp_ms,
+                                    );
                                 }
                                 if message.has_media(&message.gifs) {
-                                    process_media_item(&message.gifs.as_ref().unwrap(), src_path, message.timestamp_ms);
+                                    process_media_item(
+                                        message.gifs.as_ref().unwrap(),
+                                        src_path,
+                                        message.timestamp_ms,
+                                    );
                                 }
                             }
                         }
