@@ -1,7 +1,6 @@
-use std::path::Path;
-// helpers.rs
 use chrono::*;
 use std::io::Error;
+use std::path::Path;
 use std::process::{Command, Output};
 use std::{fs::File, io::ErrorKind};
 
@@ -11,8 +10,6 @@ pub fn get_file(src_path: &str, file_path: &str, file: &str) -> Result<File, Err
         modified_string = file_path.trim_end_matches('/');
     }
     let json_path = format!("{}/{}/{}", src_path, modified_string, file);
-
-    // println!("{json_path}")
     if Path::new(&json_path).exists() {
         File::open(json_path)
     } else {
@@ -21,17 +18,15 @@ pub fn get_file(src_path: &str, file_path: &str, file: &str) -> Result<File, Err
 }
 
 pub fn get_seconds_timestamp(time: i64) -> i64 {
-    // if its s return ms
-    // if its ms add EPOCH and return as s
     if time < 1_000_000_000_000 {
-        // Assume time is in seconds, convert to milliseconds
+        // Assume time is in seconds
         time
     } else {
         // Assume time is in milliseconds, convert to seconds
-        // let epoch = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
         (time) / 1000
     }
 }
+
 pub fn remove_prefix(input: &str, prefix: &str) -> String {
     if let Some(suffix) = input.strip_prefix(prefix) {
         suffix.to_string()
@@ -39,19 +34,10 @@ pub fn remove_prefix(input: &str, prefix: &str) -> String {
         input.to_string()
     }
 }
-pub fn set_photo_taken_time(photo_file_path: &String, timestamp: i64) -> Result<Output, Error> {
-    // let photo_path = std::path::Path::new(&photo_file_path);
-    // let time = FileTime::from_unix_time(timestamp, 0);
 
+pub fn set_photo_taken_time(photo_file_path: &String, timestamp: i64) -> Result<Output, Error> {
     let dt: DateTime<Utc> = Utc.timestamp_opt(timestamp, 0).unwrap();
     let exif_date_time = dt.format("%Y%m%d%H%M.%S").to_string();
-    // println!("{photo_file_path} {exif_date_time}");
-    // if  Path::new(&photo_file_path).exists() {
-    //     println!("file exists!");
-    // } else {
-    //     println!("file doesnt exists!");
-
-    // }
     // let command = format!("touch -t {} {}",exif_date_time,photo_file_path);
     // println!("{command}");
     Command::new("touch")
@@ -85,7 +71,6 @@ pub fn get_directories(
         .collect();
 
     Ok(directory_names)
-    // return all directories inside fullpath
 }
 
 pub fn get_json_file_names(
